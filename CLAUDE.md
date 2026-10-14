@@ -23,7 +23,7 @@ Currently supported: **temperature** (C, F, K). Next: length and mass.
 - **Adding a unit means adding one entry** to `UnitConverter.Units`. Each unit has a `Factor` and an optional `Offset` relative to its category's base unit (kelvin, meter or kilogram): `base = (value + Offset) * Factor`. Don't add per-unit code.
 - Results are rounded to 5 decimals in `UnitConverter.Convert`.
 - Invalid input (unknown unit, mixed categories, missing value) returns `400` with a ProblemDetails body (`Results.Problem`). The converter signals these cases with `ArgumentException`.
-- Every new unit or behavior gets a test case (`[Theory]`/`[InlineData]` in `UnitConverterTests`).
+- Every new unit or behavior gets a test case (`[Theory]`/`[InlineData]` in `UnitConverterTests`). The `xunit-test-writer` subagent (`.claude/agents/xunit-test-writer.md`) can write and run them.
 - Keep changes minimal. Don't add extras (CI, Docker, extra libraries) unless asked.
 
 ## Gotchas
