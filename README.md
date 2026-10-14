@@ -3,7 +3,7 @@
 An ASP.NET Core Web API (.NET 10) for converting values between units, with a simple React front-end.
 See [project-scope.md](project-scope.md) for the scope and [tech-stack.md](tech-stack.md) for the technologies used.
 
-> **Current status:** temperature conversion (Celsius, Fahrenheit, Kelvin). Length and mass come next.
+> **Current status:** temperature (Celsius, Fahrenheit, Kelvin) and length (mm, cm, m, km, in, ft, yd, mi). Mass comes next.
 
 ## Prerequisites
 
@@ -40,7 +40,7 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:5173. The page should show **API: Healthy** and a temperature converter.
+Open http://localhost:5173. The page should show **API: Healthy** and a converter with a category picker (temperature, length).
 If the API isn't running, the page shows **API unreachable** instead.
 
 During development, the Vite dev server forwards every `/api/*` request to the API at `http://localhost:5080` (see `vite.config.ts`), so no CORS setup is needed.

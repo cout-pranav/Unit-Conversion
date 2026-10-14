@@ -32,7 +32,8 @@ function App() {
     setAttempt((n) => n + 1)
   }
 
-  const [units, setUnits] = useState<Unit[]>([])
+  const [allUnits, setAllUnits] = useState<Unit[]>([])
+  const [category, setCategory] = useState('temperature')
   const [value, setValue] = useState('100')
   const [from, setFrom] = useState('C')
   const [to, setTo] = useState('F')
@@ -41,9 +42,21 @@ function App() {
 
   useEffect(() => {
     getUnits()
-      .then((loaded) => setUnits(loaded.filter((u) => u.category === 'temperature')))
+      .then(setAllUnits)
       .catch((e: unknown) => setError(e instanceof Error ? e.message : String(e)))
   }, [])
+
+  const categories = [...new Set(allUnits.map((u) => u.category))]
+  const units = allUnits.filter((u) => u.category === category)
+
+  const changeCategory = (next: string) => {
+    const nextUnits = allUnits.filter((u) => u.category === next)
+    setCategory(next)
+    setFrom(nextUnits[0]?.symbol ?? '')
+    setTo(nextUnits[1]?.symbol ?? nextUnits[0]?.symbol ?? '')
+    setResult(null)
+    setError(null)
+  }
 
   const handleConvert = async (event: FormEvent) => {
     event.preventDefault()
@@ -76,8 +89,15 @@ function App() {
       </section>
 
       <section className="card">
-        <h2>Temperature</h2>
+        <h2>Convert</h2>
         <form className="convert-form" onSubmit={handleConvert}>
+          <select aria-label="Category" value={category} onChange={(e) => changeCategory(e.target.value)}>
+            {categories.map((c) => (
+              <option key={c} value={c}>
+                {c.charAt(0).toUpperCase() + c.slice(1)}
+              </option>
+            ))}
+          </select>
           <input
             type="number"
             step="any"
