@@ -4,7 +4,7 @@ Project memory for Claude Code. See [project-scope.md](project-scope.md) for sco
 
 ## What this is
 Unit conversion app: an ASP.NET Core Web API (.NET 10, minimal APIs) and a thin React + TypeScript (Vite) front-end.
-Currently supported: **temperature** (C, F, K) and **length** (mm, cm, m, km, in, ft, yd, mi). Next: mass.
+Currently supported: **temperature** (C, F, K), **length** (mm, cm, m, km, in, ft, yd, mi) and **mass** (mg, g, kg, t, oz, lb, st).
 
 ## Commands (run from repo root unless noted)
 - API: `dotnet run --project src/UnitConversion.Api` → http://localhost:5080

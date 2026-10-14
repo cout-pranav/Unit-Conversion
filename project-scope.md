@@ -38,7 +38,7 @@ Units are identified by plain-text symbols in the query string (e.g. `C`, `F`, `
 - [x] Project skeleton: API, tests and front-end, with a health check (`/api/health`)
 - [x] Temperature: `C`, `F`, `K`, with `/api/units` and `/api/conversions`, plus the front-end converter
 - [x] Length: `mm`, `cm`, `m`, `km`, `in`, `ft`, `yd`, `mi`, plus a category picker in the front-end
-- [ ] Mass/weight
+- [x] Mass/weight: `mg`, `g`, `kg`, `t`, `oz`, `lb`, `st`
 
 ## Project Structure
 

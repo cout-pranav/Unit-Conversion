@@ -8,8 +8,9 @@ public static class UnitConverter
 {
     private const string Temperature = "temperature";
     private const string Length = "length";
+    private const string Mass = "mass";
 
-    // Base units: kelvin for temperature, meter for length.
+    // Base units: kelvin for temperature, meter for length, kilogram for mass.
     public static IReadOnlyList<Unit> Units { get; } =
     [
         new("C", "Celsius", Temperature, Factor: 1, Offset: 273.15),
@@ -24,6 +25,14 @@ public static class UnitConverter
         new("ft", "Foot", Length, Factor: 0.3048),
         new("yd", "Yard", Length, Factor: 0.9144),
         new("mi", "Mile", Length, Factor: 1609.344),
+
+        new("mg", "Milligram", Mass, Factor: 0.000001),
+        new("g", "Gram", Mass, Factor: 0.001),
+        new("kg", "Kilogram", Mass, Factor: 1),
+        new("t", "Tonne", Mass, Factor: 1000),
+        new("oz", "Ounce", Mass, Factor: 0.028349523125),
+        new("lb", "Pound", Mass, Factor: 0.45359237),
+        new("st", "Stone", Mass, Factor: 6.35029318),
     ];
 
     private static readonly Dictionary<string, Unit> UnitsBySymbol =
