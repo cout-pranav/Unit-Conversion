@@ -15,7 +15,7 @@ Currently supported: **temperature** (C, F, K), **length** (mm, cm, m, km, in, f
 - `src/UnitConversion.Api/Program.cs`: all endpoints (`/api/health`, `/api/units`, `/api/conversions`)
 - `src/UnitConversion.Api/Conversion/`: `Unit` record and the static `UnitConverter` (unit list and logic)
 - `src/UnitConversion.Web/src/api/`: one file per API area (`conversions.ts`), each wrapping `fetch`
-- `src/UnitConversion.Web/src/App.tsx`: the single page
+- `src/UnitConversion.Web/src/App.tsx`: the single page (category picker + converter). The categories come from `/api/units`, so a new category needs no front-end change
 - `tests/UnitConversion.Tests/`: xUnit tests. Unit tests for the converter, plus endpoint tests using `WebApplicationFactory<Program>`
 
 ## Rules
@@ -28,5 +28,7 @@ Currently supported: **temperature** (C, F, K), **length** (mm, cm, m, km, in, f
 
 ## Gotchas
 - Vite proxies `/api` to `http://localhost:5080` (`vite.config.ts`), so there's no CORS setup. If the API port changes, update `launchSettings.json`, `vite.config.ts`, `UnitConversion.Api.http` and README together.
-- `dotnet run` doesn't hot-reload. Restart the API after backend changes. On Windows, stop a running API before `dotnet test`/`dotnet build`, because it locks the build output.
+- `dotnet run` doesn't hot-reload. Restart the API after backend changes. On Windows, a running API locks the build output, so `dotnet test`/`dotnet build` fail (MSB3027). Either stop it first, or run `dotnet test --artifacts-path <temp dir>` to build elsewhere and leave it running.
+- Unit symbols are matched case-insensitively and must be unique that way (e.g. `Mm` for megameter would clash with `mm`). A duplicate throws when `UnitConverter` loads.
+- Rounding to 5 decimals turns very small results into `0` (e.g. `1 mg → kg`, `1 mm → km`). Use larger values in tests for these pairs.
 - The front-end linter is oxlint, and its `set-state-in-effect` rule is on. Set state in promise callbacks or event handlers, not synchronously inside `useEffect`.

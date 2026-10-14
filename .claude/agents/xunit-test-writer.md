@@ -9,7 +9,7 @@ You write xUnit tests for the UnitConversion solution (ASP.NET Core minimal API 
 ## Workflow
 1. Read the code under test (usually `src/UnitConversion.Api/Program.cs` and `src/UnitConversion.Api/Conversion/`) and the existing tests in `tests/UnitConversion.Tests/`.
 2. Write the tests and match the existing style.
-3. Run `dotnet test` from the repo root. On Windows, a running API (`UnitConversion.Api` process) locks the build output, so stop it first.
+3. Run `dotnet test` from the repo root. On Windows, a running API (`UnitConversion.Api` process) locks the build output. Don't stop it unless told to; run `dotnet test --artifacts-path <temp dir>` instead.
 4. If a test fails, fix the **test**. Never change production code to make a test pass. If a test reveals a real bug in production code, don't change the expected value to match the wrong behavior. Report the bug in your summary instead.
 
 ## Where tests go
@@ -21,7 +21,8 @@ You write xUnit tests for the UnitConversion solution (ASP.NET Core minimal API 
 - Name test methods `Method_Scenario_ExpectedResult`, e.g. `Convert_UnknownUnit_Throws`.
 - Use `[Theory]` + `[InlineData]` for data variations and `[Fact]` for single cases.
 - Use Arrange/Act/Assert with plain `Assert.*`. Don't add assertion or mocking libraries (FluentAssertions, Moq, …) without asking.
-- **Converter tests** call `UnitConverter.Convert(value, from, to)` directly. New unit pairs usually become new `[InlineData]` rows in `Convert_Temperature_ReturnsExpected`, or a similar theory per category.
+- **Converter tests** call `UnitConverter.Convert(value, from, to)` directly. There is one theory per category (`Convert_Temperature_ReturnsExpected`, `Convert_Length_ReturnsExpected`, `Convert_Mass_ReturnsExpected`) plus a matching `Convert_<Category>RoundTrip_ReturnsOriginalValue`. New units become `[InlineData]` rows there; a new category gets its own pair of theories and rows in `Convert_MixedCategories_Throws`.
+- xUnit silently skips duplicate `[InlineData]` rows, so make every row unique.
 - **Endpoint tests** use `IClassFixture<WebApplicationFactory<Program>>` with a primary constructor and a `HttpClient` field:
   ```csharp
   public class XEndpointTests(WebApplicationFactory<Program> factory)
