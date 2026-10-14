@@ -136,15 +136,79 @@ public class UnitConverterTests
     }
 
     [Theory]
-    [InlineData("m", "C")]
-    [InlineData("F", "ft")]
-    [InlineData("km", "K")]
-    public void Convert_MixedCategories_Throws(string from, string to)
+    // Every unit -> kg
+    [InlineData(1000000, "mg", "kg", 1)]
+    [InlineData(1000, "g", "kg", 1)]
+    [InlineData(1, "kg", "kg", 1)]
+    [InlineData(1, "t", "kg", 1000)]
+    [InlineData(16, "oz", "kg", 0.45359)]
+    [InlineData(1, "lb", "kg", 0.45359)]
+    [InlineData(1, "st", "kg", 6.35029)]
+    // Metric <-> metric
+    [InlineData(2.5, "t", "kg", 2500)]
+    [InlineData(1.5, "kg", "g", 1500)]
+    [InlineData(1, "g", "mg", 1000)]
+    [InlineData(2500, "mg", "kg", 0.0025)]
+    // Imperial <-> imperial
+    [InlineData(1, "lb", "oz", 16)]
+    [InlineData(1, "st", "lb", 14)]
+    [InlineData(1, "st", "oz", 224)]
+    // Metric <-> imperial
+    [InlineData(1, "kg", "lb", 2.20462)]
+    [InlineData(1, "oz", "g", 28.34952)]
+    [InlineData(1, "kg", "oz", 35.27396)]
+    // Same unit (identity)
+    [InlineData(7.5, "kg", "kg", 7.5)]
+    [InlineData(-3.25, "oz", "oz", -3.25)]
+    // Zero
+    [InlineData(0, "st", "mg", 0)]
+    // Negative values
+    [InlineData(-2, "lb", "oz", -32)]
+    [InlineData(-1, "t", "kg", -1000)]
+    // Fractional values
+    [InlineData(0.5, "st", "lb", 7)]
+    [InlineData(2.5, "lb", "oz", 40)]
+    // Rounding to 5 decimals
+    [InlineData(1, "g", "oz", 0.03527)]
+    [InlineData(1, "g", "st", 0.00016)]
+    [InlineData(1, "mg", "oz", 0.00004)]
+    // Case-insensitive symbols
+    [InlineData(2, "KG", "Lb", 4.40925)]
+    [InlineData(3, "G", "MG", 3000)]
+    public void Convert_Mass_ReturnsExpected(double value, string from, string to, double expected)
+    {
+        Assert.Equal(expected, UnitConverter.Convert(value, from, to));
+    }
+
+    [Theory]
+    [InlineData(12.345, "kg", "lb")]
+    [InlineData(2.5, "lb", "oz")]
+    [InlineData(-7.25, "st", "kg")]
+    [InlineData(100, "g", "mg")]
+    [InlineData(3.5, "t", "kg")]
+    [InlineData(1.5, "oz", "g")]
+    public void Convert_MassRoundTrip_ReturnsOriginalValue(double value, string from, string to)
+    {
+        var converted = UnitConverter.Convert(value, from, to);
+
+        var roundTripped = UnitConverter.Convert(converted, to, from);
+
+        Assert.Equal(value, roundTripped);
+    }
+
+    [Theory]
+    [InlineData("m", "C", "length", "temperature")]
+    [InlineData("F", "ft", "temperature", "length")]
+    [InlineData("km", "K", "length", "temperature")]
+    [InlineData("kg", "m", "mass", "length")]
+    [InlineData("lb", "C", "mass", "temperature")]
+    [InlineData("ft", "g", "length", "mass")]
+    public void Convert_MixedCategories_Throws(string from, string to, string fromCategory, string toCategory)
     {
         var ex = Assert.Throws<ArgumentException>(() => UnitConverter.Convert(1, from, to));
         Assert.Contains("Cannot convert", ex.Message);
-        Assert.Contains("length", ex.Message);
-        Assert.Contains("temperature", ex.Message);
+        Assert.Contains($"({fromCategory})", ex.Message);
+        Assert.Contains($"({toCategory})", ex.Message);
     }
 
     [Theory]
