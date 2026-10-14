@@ -2,24 +2,28 @@
 
 ## Overview
 
-An ASP.NET Core Web API (.NET 10) that converts a numeric value from one unit of measurement to another, for example meters to feet, Celsius to Fahrenheit, or kilograms to pounds.
+An ASP.NET Core Web API (.NET 10) that converts a numeric value from one unit of measurement to another, for example meters to feet, Celsius to Fahrenheit, or kilograms to pounds. A simple React page lets users try the API.
 
 ## In Scope
 
 - A REST endpoint for conversions:
   `GET /api/conversions?value=10&from=m&to=ft`
+- A REST endpoint listing supported units by category (used by the front-end):
+  `GET /api/units`
 - Supported categories: **length**, **temperature**, **mass/weight**
 - Units and conversion factors are hardcoded
 - Input validation with clear error responses (unknown unit, units from different categories, missing value)
-- Unit tests for the conversion logic
+- Unit tests for the conversion logic (xUnit)
+- A simple React front-end page: pick a category, enter a value, choose the from/to units, and see the result or the API error
 - `README.md` explaining how to build, run and test locally
+- `tech-stack.md` describing the technologies used
 
 ## Out of Scope
 
 - Database or external storage
 - Authentication / authorization
-- User interface
 - Currency conversion
+- Conversion logic in the front-end (the UI only calls the API)
 
 ## Design Note
 
@@ -32,13 +36,15 @@ A conversion is always `from unit → base unit → to unit`. Adding a new unit 
 ```
 Unit-Conversion/
 ├── src/
-│   └── UnitConversion.Api/
+│   ├── UnitConversion.Api/
+│   └── UnitConversion.Web/      # React front-end (Vite + TypeScript)
 ├── tests/
 │   └── UnitConversion.Tests/
 ├── UnitConversion.sln
 ├── .editorconfig
 ├── .gitignore
 ├── project-scope.md
+├── tech-stack.md
 └── README.md
 ```
 
@@ -49,3 +55,4 @@ Unit-Conversion/
 - `1 kg → lb` returns `2.20462`
 - Converting between categories (e.g. `m → kg`) returns `400 Bad Request`
 - `dotnet run` and `dotnet test` work from a clean clone
+- `npm install` and `npm run dev` in `src/UnitConversion.Web` show the page, which converts values through the API
