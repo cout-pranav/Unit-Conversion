@@ -15,7 +15,7 @@ An ASP.NET Core Web API (.NET 10) that converts a numeric value from one unit of
 - Input validation with clear error responses (unknown unit, units from different categories, missing value)
 - Unit tests for the conversion logic (xUnit)
 - A simple React front-end page: pick a category, enter a value, choose the from/to units, and see the result or the API error
-- `README.md` explaining how to build, run and test locally
+- `README.md` at the repository root with a brief description of the solution, instructions to run it locally, and the design decisions and trade-offs
 - `tech-stack.md` describing the technologies used
 
 ## Out of Scope
@@ -66,3 +66,12 @@ Unit-Conversion/
 - Converting between categories (e.g. `m → kg`) returns `400 Bad Request`
 - `dotnet run` and `dotnet test` work from a clean clone
 - `npm install` and `npm run dev` in `src/UnitConversion.Web` show the page, which converts values through the API
+
+## Deliverables
+
+- [x] A GitHub repository containing the complete solution: https://github.com/cout-pranav/Unit-Conversion
+- [x] A `README.md` at the repository root with:
+  - a brief description of the solution
+  - instructions on how to run the project locally
+  - any design decisions or trade-offs worth highlighting
+- [ ] Share the repository link with the recruiter
