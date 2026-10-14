@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
+import { convert, getUnits, type Unit } from './api/conversions'
 import { getHealth } from './api/health'
 
 type HealthState =
@@ -31,6 +32,31 @@ function App() {
     setAttempt((n) => n + 1)
   }
 
+  const [units, setUnits] = useState<Unit[]>([])
+  const [value, setValue] = useState('100')
+  const [from, setFrom] = useState('C')
+  const [to, setTo] = useState('F')
+  const [result, setResult] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    getUnits()
+      .then((loaded) => setUnits(loaded.filter((u) => u.category === 'temperature')))
+      .catch((e: unknown) => setError(e instanceof Error ? e.message : String(e)))
+  }, [])
+
+  const handleConvert = async (event: FormEvent) => {
+    event.preventDefault()
+    setResult(null)
+    setError(null)
+    try {
+      const converted = await convert(Number(value), from, to)
+      setResult(`${value} ${from} = ${converted} ${to}`)
+    } catch (e) {
+      setError(e instanceof Error ? e.message : String(e))
+    }
+  }
+
   return (
     <main>
       <h1>Unit Conversion</h1>
@@ -47,6 +73,38 @@ function App() {
         <button type="button" onClick={checkAgain} disabled={health.kind === 'checking'}>
           Check again
         </button>
+      </section>
+
+      <section className="card">
+        <h2>Temperature</h2>
+        <form className="convert-form" onSubmit={handleConvert}>
+          <input
+            type="number"
+            step="any"
+            required
+            aria-label="Value"
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+          />
+          <select aria-label="From unit" value={from} onChange={(e) => setFrom(e.target.value)}>
+            {units.map((u) => (
+              <option key={u.symbol} value={u.symbol}>
+                {u.name}
+              </option>
+            ))}
+          </select>
+          <span>→</span>
+          <select aria-label="To unit" value={to} onChange={(e) => setTo(e.target.value)}>
+            {units.map((u) => (
+              <option key={u.symbol} value={u.symbol}>
+                {u.name}
+              </option>
+            ))}
+          </select>
+          <button type="submit">Convert</button>
+        </form>
+        {result && <p className="status ok">{result}</p>}
+        {error && <p className="status error">{error}</p>}
       </section>
     </main>
   )

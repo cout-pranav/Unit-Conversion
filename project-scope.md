@@ -31,6 +31,15 @@ Each category has a **base unit** (meter, kilogram, kelvin). Every unit defines 
 
 A conversion is always `from unit → base unit → to unit`. Adding a new unit therefore only means adding one data entry, not new code. This keeps the design ready to grow to hundreds of units later.
 
+Units are identified by plain-text symbols in the query string (e.g. `C`, `F`, `K`; case-insensitive), and results are rounded to 5 decimals.
+
+## Status
+
+- [x] Project skeleton: API, tests and front-end, with a health check (`/api/health`)
+- [x] Temperature: `C`, `F`, `K`, with `/api/units` and `/api/conversions`, plus the front-end converter
+- [ ] Length
+- [ ] Mass/weight
+
 ## Project Structure
 
 ```
@@ -43,6 +52,7 @@ Unit-Conversion/
 ├── UnitConversion.sln
 ├── .editorconfig
 ├── .gitignore
+├── CLAUDE.md
 ├── project-scope.md
 ├── tech-stack.md
 └── README.md

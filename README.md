@@ -3,7 +3,7 @@
 An ASP.NET Core Web API (.NET 10) for converting values between units, with a simple React front-end.
 See [project-scope.md](project-scope.md) for the scope and [tech-stack.md](tech-stack.md) for the technologies used.
 
-> **Current status:** project skeleton. The front-end calls the API's health endpoint to show that the two are connected. Conversion endpoints come next.
+> **Current status:** temperature conversion (Celsius, Fahrenheit, Kelvin). Length and mass come next.
 
 ## Prerequisites
 
@@ -40,7 +40,7 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:5173. The page should show **API: Healthy**.
+Open http://localhost:5173. The page should show **API: Healthy** and a temperature converter.
 If the API isn't running, the page shows **API unreachable** instead.
 
 During development, the Vite dev server forwards every `/api/*` request to the API at `http://localhost:5080` (see `vite.config.ts`), so no CORS setup is needed.
@@ -64,6 +64,8 @@ npm run build
 | Method | Path          | Description                                    |
 | ------ | ------------- | ---------------------------------------------- |
 | GET    | `/api/health` | Returns `200 Healthy` when the API is running  |
+| GET    | `/api/units`  | Lists the supported units (`C`, `F`, `K`)      |
+| GET    | `/api/conversions?value=100&from=C&to=F` | Converts a value, e.g. `{ "value": 100, "from": "C", "to": "F", "result": 212 }`. Unknown units, mixed categories or a missing value return `400` with a ProblemDetails body. |
 
 In Development, the OpenAPI document is available at http://localhost:5080/openapi/v1.json.
 You can also send requests from [UnitConversion.Api.http](src/UnitConversion.Api/UnitConversion.Api.http) in VS Code or Visual Studio.
