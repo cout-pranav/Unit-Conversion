@@ -32,9 +32,20 @@ public class ConversionEndpointTests(WebApplicationFactory<Program> factory)
         Assert.Equal(expected, body!.Result);
     }
 
+    [Fact]
+    public async Task GetConversion_MetersToFeet_ReturnsResult()
+    {
+        var response = await _client.GetAsync("/api/conversions?value=10&from=m&to=ft");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var body = await response.Content.ReadFromJsonAsync<ConversionResponse>();
+        Assert.Equal(32.8084, body!.Result);
+    }
+
     [Theory]
     [InlineData("/api/conversions?value=1&from=X&to=C", "Unknown unit 'X'")]
     [InlineData("/api/conversions?value=1&from=C&to=X", "Unknown unit 'X'")]
+    [InlineData("/api/conversions?value=1&from=m&to=C", "Cannot convert")]
     [InlineData("/api/conversions?from=C&to=F", "required")]
     [InlineData("/api/conversions?value=1&to=F", "required")]
     [InlineData("/api/conversions?value=1&from=C", "required")]

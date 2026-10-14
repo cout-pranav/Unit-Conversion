@@ -72,6 +72,82 @@ public class UnitConverterTests
     }
 
     [Theory]
+    // Every unit -> m
+    [InlineData(1000, "mm", "m", 1)]
+    [InlineData(100, "cm", "m", 1)]
+    [InlineData(1, "m", "m", 1)]
+    [InlineData(1, "km", "m", 1000)]
+    [InlineData(1, "in", "m", 0.0254)]
+    [InlineData(1, "ft", "m", 0.3048)]
+    [InlineData(1, "yd", "m", 0.9144)]
+    [InlineData(1, "mi", "m", 1609.344)]
+    // Metric <-> metric
+    [InlineData(2.5, "km", "m", 2500)]
+    [InlineData(1.5, "m", "cm", 150)]
+    [InlineData(1, "cm", "mm", 10)]
+    [InlineData(1500000, "mm", "km", 1.5)]
+    // Imperial <-> imperial
+    [InlineData(1, "ft", "in", 12)]
+    [InlineData(1, "yd", "ft", 3)]
+    [InlineData(1, "mi", "yd", 1760)]
+    [InlineData(1, "mi", "ft", 5280)]
+    // Metric <-> imperial
+    [InlineData(1, "in", "cm", 2.54)]
+    [InlineData(2, "ft", "m", 0.6096)]
+    [InlineData(10, "m", "ft", 32.8084)]
+    [InlineData(1, "mi", "km", 1.60934)]
+    [InlineData(1, "m", "in", 39.37008)]
+    // Same unit (identity)
+    [InlineData(7.5, "km", "km", 7.5)]
+    [InlineData(-3.25, "in", "in", -3.25)]
+    // Zero
+    [InlineData(0, "mi", "mm", 0)]
+    // Negative values
+    [InlineData(-5, "ft", "in", -60)]
+    [InlineData(-1, "km", "m", -1000)]
+    // Fractional values
+    [InlineData(0.5, "mi", "ft", 2640)]
+    [InlineData(2.5, "in", "cm", 6.35)]
+    // Rounding to 5 decimals
+    [InlineData(1, "mm", "in", 0.03937)]
+    [InlineData(1, "ft", "mi", 0.00019)]
+    [InlineData(1, "in", "mi", 0.00002)]
+    // Case-insensitive symbols
+    [InlineData(1, "KM", "M", 1000)]
+    [InlineData(3, "Ft", "IN", 36)]
+    public void Convert_Length_ReturnsExpected(double value, string from, string to, double expected)
+    {
+        Assert.Equal(expected, UnitConverter.Convert(value, from, to));
+    }
+
+    [Theory]
+    [InlineData(12.345, "m", "ft")]
+    [InlineData(2.5, "in", "cm")]
+    [InlineData(-7.25, "yd", "m")]
+    [InlineData(100, "mm", "cm")]
+    [InlineData(3.5, "km", "mi")]
+    public void Convert_LengthRoundTrip_ReturnsOriginalValue(double value, string from, string to)
+    {
+        var converted = UnitConverter.Convert(value, from, to);
+
+        var roundTripped = UnitConverter.Convert(converted, to, from);
+
+        Assert.Equal(value, roundTripped);
+    }
+
+    [Theory]
+    [InlineData("m", "C")]
+    [InlineData("F", "ft")]
+    [InlineData("km", "K")]
+    public void Convert_MixedCategories_Throws(string from, string to)
+    {
+        var ex = Assert.Throws<ArgumentException>(() => UnitConverter.Convert(1, from, to));
+        Assert.Contains("Cannot convert", ex.Message);
+        Assert.Contains("length", ex.Message);
+        Assert.Contains("temperature", ex.Message);
+    }
+
+    [Theory]
     [InlineData("X", "C", "X")]
     [InlineData("C", "X", "X")]
     [InlineData("", "K", "")]
