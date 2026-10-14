@@ -14,7 +14,7 @@ Currently supported: **temperature** (C, F, K), **length** (mm, cm, m, km, in, f
 ## Layout
 - `src/UnitConversion.Api/Program.cs`: all endpoints (`/api/health`, `/api/units`, `/api/conversions`)
 - `src/UnitConversion.Api/Conversion/`: `Unit` record and the static `UnitConverter` (unit list and logic)
-- `src/UnitConversion.Web/src/api/`: one file per API area (`health.ts`, `conversions.ts`), each wrapping `fetch`
+- `src/UnitConversion.Web/src/api/`: one file per API area (`conversions.ts`), each wrapping `fetch`
 - `src/UnitConversion.Web/src/App.tsx`: the single page
 - `tests/UnitConversion.Tests/`: xUnit tests. Unit tests for the converter, plus endpoint tests using `WebApplicationFactory<Program>`
 
