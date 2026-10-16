@@ -12,17 +12,17 @@ Currently supported: **temperature** (C, F, K), **length** (mm, cm, m, km, in, f
 - Front-end (in `src/UnitConversion.Web`): `npm install`, `npm run dev` (http://localhost:5173), `npm run lint`, `npm run build`
 
 ## Layout
-- `src/UnitConversion.Api/Program.cs`: all endpoints (`/api/health`, `/api/units`, `/api/conversions`)
+- `src/UnitConversion.Api/Program.cs`: all endpoints (`GET /api/health`, `GET /api/units`, `POST /api/conversions` with a JSON body `{ "value": 10, "from": "m", "to": "ft" }`, bound to the `ConversionRequest` record)
 - `src/UnitConversion.Api/Conversion/`: `Unit` record and the static `UnitConverter` (unit list and logic)
 - `src/UnitConversion.Web/src/api/`: one file per API area (`conversions.ts`), each wrapping `fetch`
 - `src/UnitConversion.Web/src/App.tsx`: the single page (category picker + converter). The categories come from `/api/units`, so a new category needs no front-end change
-- `tests/UnitConversion.Tests/`: xUnit tests. Unit tests for the converter, plus endpoint tests using `WebApplicationFactory<Program>`
+- `tests/UnitConversion.Tests/`: xUnit tests. Unit tests for the converter, plus endpoint tests using `WebApplicationFactory<Program>` (conversion requests sent with `PostAsJsonAsync`)
 
 ## Rules
-- **All conversion logic lives in the API.** The front-end never does unit math. It loads units from `/api/units` and calls `/api/conversions`.
+- **All conversion logic lives in the API.** The front-end never does unit math. It loads units from `/api/units` and POSTs JSON to `/api/conversions` (never query parameters).
 - **Adding a unit means adding one entry** to `UnitConverter.Units`. Each unit has a `Factor` and an optional `Offset` relative to its category's base unit (kelvin, meter or kilogram): `base = (value + Offset) * Factor`. Don't add per-unit code.
 - Results are rounded to 5 decimals in `UnitConverter.Convert`.
-- Invalid input (unknown unit, mixed categories, missing value) returns `400` with a ProblemDetails body (`Results.Problem`). The converter signals these cases with `ArgumentException`.
+- Invalid input (unknown unit, mixed categories, missing value/field or body) returns `400` with a ProblemDetails body (`Results.Problem`). The converter signals these cases with `ArgumentException`. Framework-level errors (malformed JSON → 400, missing `Content-Type` → 415, GET → 405) also return ProblemDetails via `AddProblemDetails()` + `UseStatusCodePages()`.
 - Every new unit or behavior gets a test case (`[Theory]`/`[InlineData]` in `UnitConverterTests`). The `xunit-test-writer` subagent (`.claude/agents/xunit-test-writer.md`) can write and run them.
 - Keep changes minimal. Don't add extras (CI, Docker, extra libraries) unless asked.
 
