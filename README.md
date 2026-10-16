@@ -68,7 +68,7 @@ npm run build
 | ------ | ------------- | ---------------------------------------------- |
 | GET    | `/api/health` | Returns `200 Healthy` when the API is running  |
 | GET    | `/api/units`  | Lists all supported units with their symbol, name and category |
-| GET    | `/api/conversions?value=10&from=m&to=ft` | Converts a value, e.g. `{ "value": 10, "from": "m", "to": "ft", "result": 32.8084 }`. An unknown unit, units from different categories, or a missing `value`/`from`/`to` returns `400` with a ProblemDetails body. |
+| POST   | `/api/conversions` | Converts a value sent as a JSON body, e.g. `{ "value": 10, "from": "m", "to": "ft" }` returns `{ "value": 10, "from": "m", "to": "ft", "result": 32.8084 }`. An unknown unit, units from different categories, or a missing `value`/`from`/`to` returns `400` with a ProblemDetails body. |
 
 Example error:
 

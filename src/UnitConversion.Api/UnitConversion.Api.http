@@ -3,3 +3,10 @@
 GET {{UnitConversion.Api_HostAddress}}/api/health
 
 ###
+
+POST {{UnitConversion.Api_HostAddress}}/api/conversions
+Content-Type: application/json
+
+{ "value": 10, "from": "m", "to": "ft" }
+
+###

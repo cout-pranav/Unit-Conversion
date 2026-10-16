@@ -17,8 +17,11 @@ export async function getUnits(): Promise<Unit[]> {
 
 /** Asks the API to convert a value; throws with the API's error message on failure. */
 export async function convert(value: number, from: string, to: string): Promise<number> {
-  const query = new URLSearchParams({ value: String(value), from, to })
-  const response = await fetch(`/api/conversions?${query}`)
+  const response = await fetch('/api/conversions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ value, from, to }),
+  })
 
   if (!response.ok) {
     const problem = await response.json().catch(() => null)

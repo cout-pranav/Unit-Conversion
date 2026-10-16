@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Text;
 using Microsoft.AspNetCore.Mvc.Testing;
 
 namespace UnitConversion.Tests;
@@ -7,25 +8,30 @@ namespace UnitConversion.Tests;
 public class ConversionEndpointTests(WebApplicationFactory<Program> factory)
     : IClassFixture<WebApplicationFactory<Program>>
 {
+    private const string Url = "/api/conversions";
+
     private readonly HttpClient _client = factory.CreateClient();
 
     [Fact]
-    public async Task GetConversion_CelsiusToFahrenheit_ReturnsResult()
+    public async Task PostConversion_CelsiusToFahrenheit_ReturnsResult()
     {
-        var response = await _client.GetAsync("/api/conversions?value=100&from=C&to=F");
+        var response = await _client.PostAsJsonAsync(Url, new { value = 100, from = "C", to = "F" });
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         var body = await response.Content.ReadFromJsonAsync<ConversionResponse>();
-        Assert.Equal(212, body!.Result);
+        Assert.Equal(100, body!.Value);
+        Assert.Equal("C", body.From);
+        Assert.Equal("F", body.To);
+        Assert.Equal(212, body.Result);
     }
 
     [Theory]
-    [InlineData("/api/conversions?value=0&from=K&to=F", -459.67)]
-    [InlineData("/api/conversions?value=-40&from=f&to=c", -40)]
-    [InlineData("/api/conversions?value=36.6&from=C&to=K", 309.75)]
-    public async Task GetConversion_ValidTemperature_ReturnsResult(string url, double expected)
+    [InlineData(0, "K", "F", -459.67)]
+    [InlineData(-40, "f", "c", -40)]
+    [InlineData(36.6, "C", "K", 309.75)]
+    public async Task PostConversion_ValidTemperature_ReturnsResult(double value, string from, string to, double expected)
     {
-        var response = await _client.GetAsync(url);
+        var response = await _client.PostAsJsonAsync(Url, new { value, from, to });
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         var body = await response.Content.ReadFromJsonAsync<ConversionResponse>();
@@ -33,9 +39,9 @@ public class ConversionEndpointTests(WebApplicationFactory<Program> factory)
     }
 
     [Fact]
-    public async Task GetConversion_MetersToFeet_ReturnsResult()
+    public async Task PostConversion_MetersToFeet_ReturnsResult()
     {
-        var response = await _client.GetAsync("/api/conversions?value=10&from=m&to=ft");
+        var response = await _client.PostAsJsonAsync(Url, new { value = 10, from = "m", to = "ft" });
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         var body = await response.Content.ReadFromJsonAsync<ConversionResponse>();
@@ -43,9 +49,9 @@ public class ConversionEndpointTests(WebApplicationFactory<Program> factory)
     }
 
     [Fact]
-    public async Task GetConversion_KilogramsToPounds_ReturnsResult()
+    public async Task PostConversion_KilogramsToPounds_ReturnsResult()
     {
-        var response = await _client.GetAsync("/api/conversions?value=1&from=kg&to=lb");
+        var response = await _client.PostAsJsonAsync(Url, new { value = 1, from = "kg", to = "lb" });
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         var body = await response.Content.ReadFromJsonAsync<ConversionResponse>();
@@ -53,16 +59,16 @@ public class ConversionEndpointTests(WebApplicationFactory<Program> factory)
     }
 
     [Theory]
-    [InlineData("/api/conversions?value=1&from=X&to=C", "Unknown unit 'X'")]
-    [InlineData("/api/conversions?value=1&from=C&to=X", "Unknown unit 'X'")]
-    [InlineData("/api/conversions?value=1&from=m&to=C", "Cannot convert")]
-    [InlineData("/api/conversions?value=1&from=kg&to=m", "Cannot convert")]
-    [InlineData("/api/conversions?from=C&to=F", "required")]
-    [InlineData("/api/conversions?value=1&to=F", "required")]
-    [InlineData("/api/conversions?value=1&from=C", "required")]
-    public async Task GetConversion_InvalidInput_ReturnsBadRequest(string url, string expectedDetail)
+    [InlineData(1d, "X", "C", "Unknown unit 'X'")]
+    [InlineData(1d, "C", "X", "Unknown unit 'X'")]
+    [InlineData(1d, "m", "C", "Cannot convert")]
+    [InlineData(1d, "kg", "m", "Cannot convert")]
+    [InlineData(null, "C", "F", "required")]
+    [InlineData(1d, null, "F", "required")]
+    [InlineData(1d, "C", null, "required")]
+    public async Task PostConversion_InvalidInput_ReturnsBadRequest(double? value, string? from, string? to, string expectedDetail)
     {
-        var response = await _client.GetAsync(url);
+        var response = await _client.PostAsJsonAsync(Url, new { value, from, to });
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         var problem = await response.Content.ReadFromJsonAsync<ProblemResponse>();
@@ -70,7 +76,39 @@ public class ConversionEndpointTests(WebApplicationFactory<Program> factory)
         Assert.Contains(expectedDetail, problem.Detail);
     }
 
+    [Fact]
+    public async Task PostConversion_EmptyBody_ReturnsBadRequest()
+    {
+        var content = new StringContent("", Encoding.UTF8, "application/json");
+
+        var response = await _client.PostAsync(Url, content);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        var problem = await response.Content.ReadFromJsonAsync<ProblemResponse>();
+        Assert.Equal(400, problem!.Status);
+    }
+
+    [Fact]
+    public async Task PostConversion_MalformedJson_ReturnsBadRequest()
+    {
+        var content = new StringContent("{bad json", Encoding.UTF8, "application/json");
+
+        var response = await _client.PostAsync(Url, content);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        var problem = await response.Content.ReadFromJsonAsync<ProblemResponse>();
+        Assert.Equal(400, problem!.Status);
+    }
+
+    [Fact]
+    public async Task GetConversion_Any_ReturnsMethodNotAllowed()
+    {
+        var response = await _client.GetAsync($"{Url}?value=100&from=C&to=F");
+
+        Assert.Equal(HttpStatusCode.MethodNotAllowed, response.StatusCode);
+    }
+
     private record ConversionResponse(double Value, string From, string To, double Result);
 
-    private record ProblemResponse(int Status, string Detail);
+    private record ProblemResponse(int Status, string? Detail);
 }

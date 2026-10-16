@@ -7,7 +7,7 @@ An ASP.NET Core Web API (.NET 10) that converts a numeric value from one unit of
 ## In Scope
 
 - A REST endpoint for conversions:
-  `GET /api/conversions?value=10&from=m&to=ft`
+  `POST /api/conversions` with a JSON body `{ "value": 10, "from": "m", "to": "ft" }`
 - A REST endpoint listing supported units by category (used by the front-end):
   `GET /api/units`
 - Supported categories: **length**, **temperature**, **mass/weight**

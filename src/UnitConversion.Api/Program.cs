@@ -5,6 +5,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 builder.Services.AddHealthChecks();
+builder.Services.AddProblemDetails();
 
 var app = builder.Build();
 
@@ -14,21 +15,26 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseStatusCodePages();
 
 app.MapHealthChecks("/api/health");
 
 app.MapGet("/api/units", () => UnitConverter.Units);
 
-app.MapGet("/api/conversions", (double? value, string? from, string? to) =>
+app.MapPost("/api/conversions", (ConversionRequest? request) =>
 {
-    if (value is null || string.IsNullOrWhiteSpace(from) || string.IsNullOrWhiteSpace(to))
+    if (request?.Value is not double value
+        || string.IsNullOrWhiteSpace(request.From)
+        || string.IsNullOrWhiteSpace(request.To))
     {
-        return Results.Problem("Query parameters 'value', 'from' and 'to' are required.", statusCode: 400);
+        return Results.Problem("Fields 'value', 'from' and 'to' are required.", statusCode: 400);
     }
+
+    var (from, to) = (request.From, request.To);
 
     try
     {
-        var result = UnitConverter.Convert(value.Value, from, to);
+        var result = UnitConverter.Convert(value, from, to);
         return Results.Ok(new { value, from, to, result });
     }
     catch (ArgumentException ex)
@@ -38,3 +44,5 @@ app.MapGet("/api/conversions", (double? value, string? from, string? to) =>
 });
 
 app.Run();
+
+record ConversionRequest(double? Value, string? From, string? To);
